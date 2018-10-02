@@ -61,7 +61,6 @@
 #define snprintf  _snprintf
 #endif
 
-
 /* use win32 crypto routines for random number generation */
 /* only use for vs .net (compiler v. 1300) or greater */
 #if _MSC_VER >= 1300

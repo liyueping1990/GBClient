@@ -12,8 +12,15 @@ SipSocketServer::SipSocketServer()
 			SipSocketServer::RecvData();
 		}
 	};
-
 	std::thread(RecvData).detach();
+
+	auto RecvData1 = [&]() {
+		while (true)
+		{
+			SipSocketServer::RecvStreamingData();
+		}
+	};
+	std::thread(RecvData1).detach();
 }
 
 
@@ -31,6 +38,7 @@ void SipSocketServer::GetFirstSipMsg(std::string & sipMsg)
 	}
 	mSipMsgMutex.unlock();
 }
+
 
 void SipSocketServer::InitSocket()
 {
@@ -57,10 +65,29 @@ void SipSocketServer::InitSocket()
 	SOCKADDR_IN addrSrv;
 	addrSrv.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 	addrSrv.sin_family = AF_INET;
-	addrSrv.sin_port = htons(8060);
+	addrSrv.sin_port = htons(8060);	
+	bind(sipSocket, (SOCKADDR*)&addrSrv, sizeof(SOCKADDR));// 绑定套接字
 
-	// 绑定套接字
-	bind(sipSocket, (SOCKADDR*)&addrSrv, sizeof(SOCKADDR));
+	streamingSocket = socket(AF_INET, SOCK_DGRAM, 0);
+	SOCKADDR_IN addrSrv1;
+	addrSrv1.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
+	addrSrv1.sin_family = AF_INET;
+	addrSrv1.sin_port = htons(8000);
+	bind(streamingSocket, (SOCKADDR*)&addrSrv1, sizeof(SOCKADDR));// 绑定套接字
+	
+}
+
+
+void SipSocketServer::RecvStreamingData()
+{
+	// 等待并接收数据
+	SOCKADDR_IN addrClient;
+	int len = sizeof(SOCKADDR);
+	char recvBuf[1024 * 4] = { 0 };
+	recvfrom(streamingSocket, recvBuf, 4096, 0, (SOCKADDR*)&addrClient, &len);
+	
+	//std::string str = recvBuf;
+	//std::cout << "recv streaming data:" << str.length() << std::endl;
 }
 
 void SipSocketServer::RecvData()
@@ -70,7 +97,8 @@ void SipSocketServer::RecvData()
 	int len = sizeof(SOCKADDR);
 	char recvBuf[1024 * 4] = { 0 };
 	recvfrom(sipSocket, recvBuf, 4096, 0, (SOCKADDR*)&addrClient, &len);
-	printf("%s\n", recvBuf);
+	//printf("%s\n", recvBuf);
+	//std::cout << recvBuf << std::endl;
 
 	mSipMsgMutex.lock();
 	mSipMsgList.push_back(recvBuf);
@@ -86,7 +114,8 @@ void SipSocketServer::SendData(const char * sipMsg, const char * ip, const int p
 	// 发送数据
 	sendto(sipSocket, sipMsg, strlen(sipMsg), 0,
 		(SOCKADDR*)&addrSrv, sizeof(SOCKADDR));
-	printf("%s\n", sipMsg);
+	//printf("%s\n", sipMsg);
+	//std::cout << sipMsg << std::endl;
 }
 
 void SipSocketServer::CloseSocket()

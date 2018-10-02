@@ -1,5 +1,4 @@
 #pragma once
-#include "DBServer.h"
 #include "SipMsgHeaderParser.h"
 #include "SipXmlBodyParser.h"
 #include "SipSdpBodyParser.h"
@@ -11,8 +10,7 @@ public:
 	SipMsgObj();
 	virtual ~SipMsgObj();
 
-	int GetLocalPlatformInfo();
-	int GetRemotePlatformInfo(std::string& remoteDeviceID);
+	int SetRemotePlatformInfo(std::weak_ptr<PlatformInfo> platformInfo, bool isLocal = false);
 
 	// Register
 	int CreateRegister401SipMsg(const osip_message_t* srcSipMsg, osip_message_t* &dstSipMsg, std::string nonce, std::string toTag = ""); // 401
@@ -27,6 +25,7 @@ public:
 
 	// Message
 	int CreateSipMsgXml(osip_message_t* &dstSipMsg, std::string remoteDeviceID);
+	int CreateSipMsgXml(osip_message_t* &dstSipMsg);
 
 	// Response
 	// 1xx,2xx,3xx,4xx
@@ -38,17 +37,20 @@ public:
 	SdpParam* GetSdpParam(const osip_message_t* sipMsg);
 private:
 	// 平台参数信息
-	int mLocalPlatformID;
-	std::string mLocalSipID;		// 本级平台28181国标编码
-	std::string mLocalSipDomain;	// 本级平台所在域编码
-	std::string mLocalIP;			// 本级平台sip信令IP地址
-	int mLocalPort;			        // 本级平台sip信令端口号
+	//int mLocalPlatformID;
+	//std::string mLocalSipID;		// 本级平台28181国标编码
+	//std::string mLocalSipDomain;	// 本级平台所在域编码
+	//std::string mLocalIP;			// 本级平台sip信令IP地址
+	//int mLocalPort;			        // 本级平台sip信令端口号
 
-	int mRemotePlatformID;
-	std::string mRemoteSipID;		// 级联平台28181国标编码
-	std::string mRemoteSipDomain;	// 级联平台所在域编码
-	std::string mRemoteIP;			// 级联平台sip信令IP地址
-	int mRemotePort;		        // 级联平台sip信令端口号
+	//int mRemotePlatformID;
+	//std::string mRemoteSipID;		// 级联平台28181国标编码
+	//std::string mRemoteSipDomain;	// 级联平台所在域编码
+	//std::string mRemoteIP;			// 级联平台sip信令IP地址
+	//int mRemotePort;		        // 级联平台sip信令端口号
+
+	static std::shared_ptr<PlatformInfo> mLocalPlatformInfo;
+	std::shared_ptr<PlatformInfo> mRemotePlatformInfo;
 
 
 	XmlParam* mXmlParam;
@@ -67,11 +69,6 @@ private:
 	int CreateNewSipMsg(const osip_message_t* srcSipMsg, osip_message_t* &dstSipMsg, osip_fsm_type_t msgType);
 	int CreateNewSipMsg_C(const osip_message_t* srcSipMsg, osip_message_t* &dstSipMsg);
 	int CreateNewSipMsg_S(const osip_message_t* srcSipMsg, osip_message_t* &dstSipMsg);
-
-	//int CreateNewSipMsg_ICT(const osip_message_t* srcSipMsg, osip_message_t* &dstSipMsg);
-	//int CreateNewSipMsg_IST(const osip_message_t* srcSipMsg, osip_message_t* &dstSipMsg);
-	//int CreateNewSipMsg_NICT(const osip_message_t* srcSipMsg, osip_message_t* &dstSipMsg);
-	//int CreateNewSipMsg_NIST(const osip_message_t* srcSipMsg, osip_message_t* &dstSipMsg);
 
 	// Clone SipMsgBody
 	int CloneSipMsgBody(const osip_message_t* srcSipMsg, osip_message_t* &dstSipMsg);

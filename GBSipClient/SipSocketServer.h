@@ -17,6 +17,8 @@ public:
 
 //private:
 	SOCKET sipSocket;
+	SOCKET streamingSocket;
+	void RecvStreamingData();
 	std::mutex mSipMsgMutex;
 	std::deque<std::string> mSipMsgList;
 

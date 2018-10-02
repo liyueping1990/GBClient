@@ -22,9 +22,9 @@
 #define _OSIP_H_
 
 #if defined WIN32
-//#include <WinSock2.h>
-#include <winsock.h>
+#include <WinSock2.h>
 #else 
+
 #endif
 
 #include <osipparser2/osip_const.h>

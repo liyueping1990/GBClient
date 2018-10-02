@@ -1,4 +1,7 @@
 <RCC>
-    <qresource prefix="GBSipClient">
-    </qresource>
+  <qresource prefix="GBSipClient">
+    <file>Resources/org.png</file>
+    <file>Resources/qiang.png</file>
+    <file>Resources/qiu.png</file>
+  </qresource>
 </RCC>

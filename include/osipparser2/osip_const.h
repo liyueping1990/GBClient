@@ -26,9 +26,7 @@
 #endif
 
 #define CRLF "\r\n\0"
-#if defined(_MSC_VER) && _MSC_VER<1900
 #define CR   "\r\0"
-#endif
 #define LF   "\n\0"
 #define SP   " \0"
 

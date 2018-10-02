@@ -1,6 +1,6 @@
 #include "SipMsgObj.h"
 
-
+std::shared_ptr<PlatformInfo> SipMsgObj::mLocalPlatformInfo;
 
 SipMsgObj::SipMsgObj()
 {
@@ -8,18 +8,6 @@ SipMsgObj::SipMsgObj()
 	mSipMsgBody = nullptr;
 	mXmlParam = nullptr;
 	mSdpParam = nullptr;
-
-	mLocalPlatformID = 1;
-	mLocalSipID = "34020000002000000001";		// 本级平台28181国标编码
-	mLocalSipDomain = "3402000000";		// 本级平台所在域编码
-	mLocalIP = "192.168.1.110";		// 本级平台sip信令IP地址
-	mLocalPort = 8060;			    // 本级平台sip信令端口号
-
-	mRemotePlatformID = 2;
-	mRemoteSipID = "34020000001320000001";			// 级联平台28181国标编码
-	mRemoteSipDomain = "123";		// 级联平台所在域编码
-	mRemoteIP = "192.168.1.108";		// 级联平台sip信令IP地址
-	mRemotePort = 5060;		        // 级联平台sip信令端口号
 }
 
 
@@ -37,14 +25,22 @@ SipMsgObj::~SipMsgObj()
 	delete mSipMsgHeader;
 }
 
-int SipMsgObj::GetLocalPlatformInfo()
+int SipMsgObj::SetRemotePlatformInfo(std::weak_ptr<PlatformInfo> platformInfo, bool isLocal)
 {
-	return 0;
-}
-
-int SipMsgObj::GetRemotePlatformInfo(std::string& remoteDeviceID)
-{
-	return 0;
+	int result = -1;
+	if (auto info = platformInfo.lock())
+	{
+		if (isLocal)
+		{
+			mLocalPlatformInfo = info;
+		}
+		else
+		{
+			mRemotePlatformInfo = info;
+		}
+		result = 0;
+	}
+	return result;
 }
 
 int SipMsgObj::CreateRegister401SipMsg(const osip_message_t* srcSipMsg, osip_message_t* &dstSipMsg, std::string nonce, std::string toTag)
@@ -56,7 +52,7 @@ int SipMsgObj::CreateRegister401SipMsg(const osip_message_t* srcSipMsg, osip_mes
 		if (!nonce.empty())// www-Authenticate
 		{
 			char realm[64] = { 0 };
-			sprintf(realm, "\"%s\"", mLocalSipDomain.c_str());
+			sprintf(realm, "\"%s\"", mLocalPlatformInfo->domain.c_str());
 			char authNonce[64] = { 0 };
 			sprintf(authNonce, "\"%s\"", nonce.c_str());
 			mSipMsgHeader->SetSipMsgWWW_Authrnticate(dstSipMsg, realm, authNonce);
@@ -95,7 +91,7 @@ int SipMsgObj::CreateInviteSipMsg(osip_message_t *& dstSipMsg, SdpParam* sdpPara
 	//GetLocalPlatformInfo();
 
 	// 获取对方平台相关信息
-	int result = GetRemotePlatformInfo(sdpParam->deviceID);
+	int result = SetRemotePlatformInfo(sdpParam->deviceID);
 	if (result == -1)
 	{
 		osip_message_free(dstSipMsg);
@@ -151,11 +147,6 @@ int SipMsgObj::CreateSipMsgXml(osip_message_t* &dstSipMsg, std::string remoteDev
 
 	osip_message_init(&dstSipMsg);
 
-	// 获取本平台相关信息
-	//GetLocalPlatformInfo();
-
-	// 获取对方平台相关信息
-	result = GetRemotePlatformInfo(remoteDeviceID);
 	if (result == -1)
 	{
 		osip_message_free(dstSipMsg);
@@ -189,6 +180,11 @@ int SipMsgObj::CreateSipMsgXml(osip_message_t* &dstSipMsg, std::string remoteDev
 	delete mSipMsgBody;
 	mSipMsgBody = nullptr;
 	return 0;
+}
+
+int SipMsgObj::CreateSipMsgXml(osip_message_t* &dstSipMsg)
+{
+
 }
 
 int SipMsgObj::CreateXxxSipMsg(const osip_message_t * srcSipMsg, osip_message_t *& dstSipMsg, int statusCode, std::string toTag)
@@ -259,6 +255,11 @@ XmlParam* SipMsgObj::GetXmlParam(const osip_message_t * sipMsg)
 	return mXmlParam;
 }
 
+SdpParam * SipMsgObj::GetSdpParam(const osip_message_t * sipMsg)
+{
+	return nullptr;
+}
+
 int SipMsgObj::SetSipMsgRequestStartLine(osip_message_t *& dstSipMsg, const char * method)
 {
 	int result = 0;
@@ -266,7 +267,7 @@ int SipMsgObj::SetSipMsgRequestStartLine(osip_message_t *& dstSipMsg, const char
 	{
 		result = mSipMsgHeader->SetSipMsgVersion(dstSipMsg);
 		result = result + mSipMsgHeader->SetSipMsgMethod(dstSipMsg, method);
-		result = result + mSipMsgHeader->SetSipMsgReqUri(dstSipMsg, mRemoteSipID.c_str(), mRemoteIP.c_str(), std::to_string(mRemotePort).c_str());
+		result = result + mSipMsgHeader->SetSipMsgReqUri(dstSipMsg, mRemotePlatformInfo->deviceID.c_str(), mRemotePlatformInfo->ip.c_str(), std::to_string(mRemotePlatformInfo->port).c_str());
 	}
 	return result;
 }
@@ -336,17 +337,17 @@ int SipMsgObj::CreateNewSipMsg(const osip_message_t * srcSipMsg, osip_message_t 
 
 int SipMsgObj::CreateNewSipMsg_C(const osip_message_t * srcSipMsg, osip_message_t *& dstSipMsg)
 {
-	mSipMsgHeader->SetSipMsgVia(dstSipMsg, mLocalIP.c_str(), std::to_string(mLocalPort).c_str(), SipCommon::CreatUuid().c_str());
+	mSipMsgHeader->SetSipMsgVia(dstSipMsg, mLocalPlatformInfo->ip.c_str(), std::to_string(mLocalPlatformInfo->port).c_str(), SipCommon::CreatUuid().c_str());
 
 	//mSipMsgHeader->SetSipMsgFrom(dstSipMsg, mLocalSipID, mLocalSipDomain, SipCommon::CreatUuid());
-	mSipMsgHeader->SetSipMsgFrom(dstSipMsg, mLocalSipID.c_str(), mLocalIP.c_str(), std::to_string(mLocalPort).c_str(), SipCommon::CreatUuid().c_str());
+	mSipMsgHeader->SetSipMsgFrom(dstSipMsg, mLocalPlatformInfo->deviceID.c_str(), mLocalPlatformInfo->ip.c_str(), std::to_string(mLocalPlatformInfo->port).c_str(), SipCommon::CreatUuid().c_str());
 
 	//mSipMsgHeader->SetSipMsgTo(dstSipMsg, mRemoteSipID, mRemoteSipDomain);
-	mSipMsgHeader->SetSipMsgTo(dstSipMsg, mRemoteSipID.c_str(), mRemoteIP.c_str(), std::to_string(mRemotePort).c_str());
+	mSipMsgHeader->SetSipMsgTo(dstSipMsg, mRemotePlatformInfo->deviceID.c_str(), mRemotePlatformInfo->ip.c_str(), std::to_string(mRemotePlatformInfo->port).c_str());
 
-	mSipMsgHeader->SetSipMsgCallID(dstSipMsg, mLocalIP.c_str(), SipCommon::CreatUuid().c_str());
+	mSipMsgHeader->SetSipMsgCallID(dstSipMsg, mLocalPlatformInfo->ip.c_str(), SipCommon::CreatUuid().c_str());
 	mSipMsgHeader->SetSipMsgCseq(dstSipMsg, "1", dstSipMsg->sip_method);
-	mSipMsgHeader->SetSipMsgContact(dstSipMsg, mLocalSipID.c_str(), mLocalIP.c_str(), std::to_string(mLocalPort).c_str());
+	mSipMsgHeader->SetSipMsgContact(dstSipMsg, mLocalPlatformInfo->deviceID.c_str(), mLocalPlatformInfo->ip.c_str(), std::to_string(mLocalPlatformInfo->port).c_str());
 	mSipMsgHeader->SetSipMsgMaxForward(dstSipMsg);
 	// User-Agent
 	mSipMsgHeader->SetSipMsgUserAgent(dstSipMsg);

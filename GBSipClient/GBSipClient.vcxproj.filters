@@ -36,9 +36,6 @@
     <ClCompile Include="GBSipClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DBServer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SipCallback.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -60,9 +57,6 @@
     <ClCompile Include="SipMsgObj.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SipXmlBodyParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SipSdpBodyParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -76,6 +70,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SipMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SipDBServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SipMsgXmlBody.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SipUtilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -95,9 +98,6 @@
     </QtRcc>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DBServer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SipCallback.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -125,9 +125,6 @@
     <ClInclude Include="SipDefine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SipXmlBodyParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SipSdpBodyParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -141,6 +138,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SipMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SipDBServer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SipMsgXmlBody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SipUtilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

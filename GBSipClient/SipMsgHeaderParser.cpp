@@ -705,13 +705,13 @@ int SipMsgHeaderParser::SetSipMsgAuthorization(osip_message_t * sipMsg, const os
 
 		// usename
 		char username[32] = { 0 };
-		sprintf("\"%s\"", sipMsg->from->url->username);
+		sprintf(username, "\"%s\"", sipMsg->from->url->username);
 
 		// uri
 		char* uri = nullptr;
 		osip_uri_to_str(sipMsg->req_uri, &uri);
 		char strUri[64] = { 0 };
-		sprintf("\"%s\"", uri);
+		sprintf(strUri, "\"%s\"", uri);
 		osip_free(uri);
 		uri = nullptr;
 

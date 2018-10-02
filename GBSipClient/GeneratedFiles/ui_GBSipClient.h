@@ -13,10 +13,11 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
-#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QOpenGLWidget>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QTableView>
+#include <QtWidgets/QTreeView>
 #include <QtWidgets/QTreeWidget>
 #include <QtWidgets/QWidget>
 
@@ -27,8 +28,8 @@ class Ui_GBSipClientClass
 public:
     QOpenGLWidget *openGLWidget;
     QTreeWidget *treeWidget;
-    QWidget *widget;
-    QHBoxLayout *horizontalLayout;
+    QTreeView *treeView;
+    QTableView *tableView;
     QPushButton *pushButton;
     QPushButton *pushButton_2;
 
@@ -36,36 +37,36 @@ public:
     {
         if (GBSipClientClass->objectName().isEmpty())
             GBSipClientClass->setObjectName(QStringLiteral("GBSipClientClass"));
-        GBSipClientClass->resize(1200, 900);
+        GBSipClientClass->resize(954, 900);
         openGLWidget = new QOpenGLWidget(GBSipClientClass);
         openGLWidget->setObjectName(QStringLiteral("openGLWidget"));
         openGLWidget->setGeometry(QRect(280, 10, 651, 531));
+        openGLWidget->setStyleSheet(QLatin1String("background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(0, 0, 0, 255), stop:0.19397 rgba(0, 0, 0, 255), stop:0.202312 rgba(122, 97, 0, 255), stop:0.495514 rgba(76, 58, 0, 255), stop:0.504819 rgba(255, 255, 255, 255), stop:0.79 rgba(255, 255, 255, 255), stop:1 rgba(255, 158, 158, 255));\n"
+"selection-background-color: rgb(255, 56, 7);"));
         treeWidget = new QTreeWidget(GBSipClientClass);
         QTreeWidgetItem *__qtreewidgetitem = new QTreeWidgetItem();
         __qtreewidgetitem->setText(0, QStringLiteral("1"));
         treeWidget->setHeaderItem(__qtreewidgetitem);
         treeWidget->setObjectName(QStringLiteral("treeWidget"));
-        treeWidget->setGeometry(QRect(10, 11, 261, 531));
-        widget = new QWidget(GBSipClientClass);
-        widget->setObjectName(QStringLiteral("widget"));
-        widget->setGeometry(QRect(500, 570, 158, 25));
-        horizontalLayout = new QHBoxLayout(widget);
-        horizontalLayout->setSpacing(6);
-        horizontalLayout->setContentsMargins(11, 11, 11, 11);
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        horizontalLayout->setContentsMargins(0, 0, 0, 0);
-        pushButton = new QPushButton(widget);
+        treeWidget->setGeometry(QRect(690, 560, 121, 51));
+        treeWidget->setStyleSheet(QStringLiteral(""));
+        treeView = new QTreeView(GBSipClientClass);
+        treeView->setObjectName(QStringLiteral("treeView"));
+        treeView->setGeometry(QRect(10, 10, 241, 531));
+        tableView = new QTableView(GBSipClientClass);
+        tableView->setObjectName(QStringLiteral("tableView"));
+        tableView->setGeometry(QRect(0, 690, 941, 192));
+        pushButton = new QPushButton(GBSipClientClass);
         pushButton->setObjectName(QStringLiteral("pushButton"));
-
-        horizontalLayout->addWidget(pushButton);
-
-        pushButton_2 = new QPushButton(widget);
+        pushButton->setGeometry(QRect(480, 570, 75, 23));
+        pushButton_2 = new QPushButton(GBSipClientClass);
         pushButton_2->setObjectName(QStringLiteral("pushButton_2"));
-
-        horizontalLayout->addWidget(pushButton_2);
-
+        pushButton_2->setGeometry(QRect(582, 571, 75, 23));
 
         retranslateUi(GBSipClientClass);
+        QObject::connect(treeView, SIGNAL(doubleClicked(QModelIndex)), GBSipClientClass, SLOT(treeDoubleCllicked(QModelIndex)));
+        QObject::connect(treeView, SIGNAL(clicked(QModelIndex)), GBSipClientClass, SLOT(treeCllicked(QModelIndex)));
+        QObject::connect(pushButton, SIGNAL(clicked()), GBSipClientClass, SLOT(queryCatalog()));
 
         QMetaObject::connectSlotsByName(GBSipClientClass);
     } // setupUi

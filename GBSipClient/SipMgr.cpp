@@ -28,22 +28,24 @@ int SipMgr::Start()
 {
 	Init();
 
-	std::string sipMsg = "";
-	while (true)
+	auto run = [&]()
 	{
-		mSocketServer.GetFirstSipMsg(sipMsg);
-		if (sipMsg.size())
+		std::string sipMsg = "";
+		while (true)
 		{
-			ProcessIncomingSipMsg(sipMsg);
-			sipMsg.clear();
-			
+			mSocketServer.GetFirstSipMsg(sipMsg);
+			if (sipMsg.size())
+			{
+				ProcessIncomingSipMsg(sipMsg);
+				sipMsg.clear();
+			}
+			else
+			{
+				std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+			}
 		}
-		else
-		{
-			std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-		}
-	}
-
+	};
+	std::thread(run).detach();
 	return 0;
 }
 
@@ -181,6 +183,15 @@ int SipMgr::CreateTransaction(osip_transaction_t *& transaction, osip_event_t * 
 		}*/
 		transaction->your_instance = (void*)appContext;
 	}
+	return 0;
+}
+
+int SipMgr::QueryCatalog(std::string deviceID)
+{
+	SipMsgBuilder sipMsgBuilder;
+
+	osip_message_t* dstSipMsg = nullptr;
+	sipMsgBuilder.CreateSipMsgXml(dstSipMsg, deviceID);
 	return 0;
 }
 

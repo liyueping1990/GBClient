@@ -112,6 +112,7 @@ void SipCallback::osip_rcv_message_cb(int type, osip_transaction_t *trn, osip_me
 			sdpParam->cParam.addr = "192.168.1.110";
 			sdpParam->mParam.port = 8000;
 			sdpParam->mParam.isRecvOnly = true;
+			sdpParam->y = "0001";
 			inviteBuilder.CreateInviteSipMsg(inviteSipMsg, sdpParam);
 
 			char* strMsg = nullptr;
@@ -286,10 +287,8 @@ void SipCallback::osip_nist_rcv_register_cb(int type, osip_transaction_t * trn, 
 
 					// 创建regDialog
 					SipDialog regSipDialog = sipInstance->mSipDialogMgr->CreateSipDialog(trn, dstMsg, DialogType::REGISTER_DIALOG);
-
-					osip_event_t* event = osip_new_outgoing_sipmessage(dstMsg);
-					event->transactionid = trn->transactionid;
-					osip_fifo_add(trn->transactionff, event);
+										
+					AddSipMsgToTrnFF(trn, dstMsg);
 				}
 				else // 验证失败，403
 				{

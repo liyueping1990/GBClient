@@ -49,6 +49,7 @@ extern "C" {
 #else
 
 #define HAVE_STRUCT_TIMESPEC
+
 /* condv implementation */
 #if defined(WIN32) || defined(_WIN32_WCE)
 /* Prevent struct redefinition if Pthreads for Win32 is used */

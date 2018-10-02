@@ -11,7 +11,17 @@
 #include "SipMsgObj.h"
 #include "SipCallback.h"
 #include "SipDialogMgr.h"
-#include "DBServer.h"
+#include "SipDBServer.h"
+
+struct CommentObj
+{
+	int type;
+	void* param1;
+	void* param2;
+	void* param3;
+	void* param4;
+};
+#define CommentObjList std::vector<CommentObj>
 
 struct AppContext
 {
@@ -39,7 +49,11 @@ public:
 	SipSocketServer mSocketServer;
 	SipDialogMgr* mSipDialogMgr;
 
-//private:
+	int CreateTransaction(osip_transaction_t* &transaction, osip_event_t* event);
+
+	int QueryCatalog(std::string deviceID); // 查询国标平台或设备目录信息
+private:
+		
 	SipMgr();
 	void Init();
 	static SipMgr* instance;
@@ -49,7 +63,6 @@ public:
 	void RegisterCommonCallbacks();
 
 	std::deque<osip_event_t*> mSipEvents;
-	int CreateTransaction(osip_transaction_t* &transaction, osip_event_t* event);
 	void ProcessIncomingSipMsg(std::string &sipMsg);
 	void ProcessOutGoingSipMsg(osip_transaction_t* callTransaction, osip_event_t* &event);
 
