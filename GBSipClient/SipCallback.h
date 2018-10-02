@@ -3,8 +3,8 @@
 
 namespace SipCallback
 {
-	int AddSipMsgToTrnFF(osip_transaction_t* trn, osip_message_t* &sipMsg);
-	int AddEventToTrnFF(osip_transaction_t* trn, osip_event_t* &event);
+	//int AddSipMsgToTrnFF(osip_transaction_t* trn, osip_message_t* &sipMsg);
+	//int AddEventToTrnFF(osip_transaction_t* trn, osip_event_t* &event);
 
 	// ∑¢ÀÕsipœ˚œ¢
 	int osip_send_message_cb(osip_transaction_t* trn, osip_message_t* sipMsg, char* dstIP, int dstPort, int sendSock);

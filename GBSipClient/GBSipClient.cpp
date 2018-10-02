@@ -12,6 +12,7 @@ GBSipClient::GBSipClient(QWidget *parent)
 {
 	ui.setupUi(this);
 	mSipDB = new SipDBServer;
+	mSipMgr = SipMgr::GetInstance();
 
 	CreateCatalogTree();
 	CreatePlatformTable();
@@ -187,13 +188,17 @@ void GBSipClient::treeDoubleCllicked(const QModelIndex &index)
 	}
 	else // 播放视频
 	{
-
+		mSipMgr->Play(deviceID.toStdString());
 	}
 }
 
 void GBSipClient::treeCllicked(const QModelIndex &index)
 {
-	int a = index.row();
+	QMessageBox msgBox;
+	msgBox.setWindowTitle(QStringLiteral("提示"));
+	msgBox.setText(QStringLiteral("尚未选中需要查询目录平台或设备"));
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	msgBox.exec();
 }
 
 void GBSipClient::queryCatalog()
@@ -207,8 +212,7 @@ void GBSipClient::queryCatalog()
 
 		// 获取平台DeviceID，对下级进行目录查询
 		QString deviceID = deviceIdItem->text();
-		//mSipMgr->
-		
+		mSipMgr->QueryCatalog(deviceID.toStdString());
 	}
 	else
 	{
@@ -218,6 +222,14 @@ void GBSipClient::queryCatalog()
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.exec();
 	}
-	
-	int a = 2;
+}
+
+void GBSipClient::refreshCatalog()
+{
+	QStandardItemModel* model = (QStandardItemModel*)ui.treeView->model();
+	model->clear();
+	delete model;
+	model = nullptr;
+
+	CreateCatalogTree();
 }

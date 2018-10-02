@@ -6,6 +6,7 @@ SipMsgObj::SipMsgObj()
 {
 	mSipMsgHeader = new SipMsgHeaderParser;
 	mSipMsgBody = nullptr;
+
 	mXmlParam = nullptr;
 	mSdpParam = nullptr;
 }
@@ -13,19 +14,18 @@ SipMsgObj::SipMsgObj()
 
 SipMsgObj::~SipMsgObj()
 {
+	delete mSipMsgHeader;
+	mSipMsgHeader = nullptr;
+
 	if (mSipMsgBody)
 	{
 		delete mSipMsgBody;
-	}
-	if (mXmlParam)
-	{
-		delete mXmlParam;
+		mSipMsgBody = nullptr;
 	}
 
-	delete mSipMsgHeader;
 }
 
-int SipMsgObj::SetRemotePlatformInfo(std::weak_ptr<PlatformInfo> platformInfo, bool isLocal)
+int SipMsgObj::SetPlatformInfo(std::weak_ptr<PlatformInfo> platformInfo, bool isLocal)
 {
 	int result = -1;
 	if (auto info = platformInfo.lock())
@@ -87,17 +87,6 @@ int SipMsgObj::CreateInviteSipMsg(osip_message_t *& dstSipMsg, SdpParam* sdpPara
 		return -1;
 	}
 
-	// 获取本平台相关信息
-	//GetLocalPlatformInfo();
-
-	// 获取对方平台相关信息
-	int result = SetRemotePlatformInfo(sdpParam->deviceID);
-	if (result == -1)
-	{
-		osip_message_free(dstSipMsg);
-		return result;
-	}
-
 	// start-line
 	SetSipMsgRequestStartLine(dstSipMsg, "INVITE");
 
@@ -118,6 +107,34 @@ int SipMsgObj::CreateInviteSipMsg(osip_message_t *& dstSipMsg, SdpParam* sdpPara
 
 int SipMsgObj::CreateInviteSipMsg(const osip_message_t * srcSipMsg, osip_message_t *& dstSipMsg)
 {	
+	if (srcSipMsg)
+	{
+	}
+	else
+	{
+		osip_message_init(&dstSipMsg);
+		if (dstSipMsg == nullptr)
+		{
+			return -1;
+		}
+
+		// start-line
+		SetSipMsgRequestStartLine(dstSipMsg, "INVITE");
+
+		// via、from、to、call-id、CSeq、Contact、max-forward
+		CreateNewSipMsg(nullptr, dstSipMsg, ICT);
+
+		// Content_Type
+		mSipMsgHeader->SetSipMsgContentType(dstSipMsg, "APPLICATION/SDP");
+
+		// BODY
+		mSipMsgBody = new SipSdpBodyParser;
+		mSipMsgBody->CreateSipMsgBody(mSdpParam.get(), mSdpParam->bodyString);
+		AppendBodyForSipMsg(dstSipMsg, mSdpParam->bodyString.c_str());
+		delete mSipMsgBody;
+		mSipMsgBody = nullptr;
+	}
+
 	return 0;
 }
 
@@ -163,11 +180,6 @@ int SipMsgObj::CreateSipMsgXml(osip_message_t* &dstSipMsg, std::string remoteDev
 	// Content_Type
 	mSipMsgHeader->SetSipMsgContentType(dstSipMsg, "Application/MANSCDP+xml");
 
-	if (mXmlParam == nullptr)
-	{
-		mXmlParam =  new XmlParam;
-	}
-
 	// Body
 	//mXmlParam.localSipID = mLocalSipID;
 	//mXmlParam.remoteSipID = mRemoteSipID;
@@ -184,7 +196,38 @@ int SipMsgObj::CreateSipMsgXml(osip_message_t* &dstSipMsg, std::string remoteDev
 
 int SipMsgObj::CreateSipMsgXml(osip_message_t* &dstSipMsg)
 {
+	int result = -1;
 
+	if (dstSipMsg)
+	{
+		osip_message_free(dstSipMsg);
+		dstSipMsg = nullptr;
+	}
+
+	result = osip_message_init(&dstSipMsg);
+	if (result == -1)
+	{
+		osip_message_free(dstSipMsg);
+		dstSipMsg = nullptr;
+		return result;
+	}
+
+	// start-line
+	SetSipMsgRequestStartLine(dstSipMsg, "MESSAGE");
+
+	// via、from、to、call-id、CSeq、Contact、max-forward
+	CreateNewSipMsg(nullptr, dstSipMsg, NICT);
+
+	// Content_Type
+	mSipMsgHeader->SetSipMsgContentType(dstSipMsg, "Application/MANSCDP+xml");
+
+	// Body
+	mSipMsgBody = new SipXmlBodyParser;
+	mSipMsgBody->CreateSipMsgBody(mXmlParam.get(), mXmlParam->bodyString);
+	AppendBodyForSipMsg(dstSipMsg, mXmlParam->bodyString.c_str());
+	delete mSipMsgBody;
+	mSipMsgBody = nullptr;
+	return 0;
 }
 
 int SipMsgObj::CreateXxxSipMsg(const osip_message_t * srcSipMsg, osip_message_t *& dstSipMsg, int statusCode, std::string toTag)
@@ -242,22 +285,44 @@ int SipMsgObj::ParserSipMsg(const osip_message_t * sipMsg)
 	return 0;
 }
 
-XmlParam* SipMsgObj::GetXmlParam(const osip_message_t * sipMsg)
+std::shared_ptr<XmlParam> SipMsgObj::GetXmlParam(const osip_message_t * sipMsg)
 {
 	if (sipMsg != nullptr)
 	{
 		mSipMsgBody = new SipXmlBodyParser;
-		mXmlParam = new XmlParam;
+		mXmlParam = std::make_shared<XmlParam>();
 		osip_body_t* body = nullptr;
 		body = (osip_body_t*)osip_list_get(&sipMsg->bodies, 0);
-		mSipMsgBody->ParserSipMsgBody(body->body, mXmlParam);
+		mSipMsgBody->ParserSipMsgBody(body->body, mXmlParam.get());
 	}
 	return mXmlParam;
 }
 
-SdpParam * SipMsgObj::GetSdpParam(const osip_message_t * sipMsg)
+int SipMsgObj::SetXmlParam(std::weak_ptr<XmlParam> xmlParam)
+{
+	int result = -1;
+	if (auto param = xmlParam.lock())
+	{
+		mXmlParam = param;
+		result = 0;
+	}
+	return result;
+}
+
+std::shared_ptr<SdpParam> SipMsgObj::GetSdpParam(const osip_message_t * sipMsg)
 {
 	return nullptr;
+}
+
+int SipMsgObj::SetSdpParam(std::weak_ptr<SdpParam> sdpParam)
+{
+	int result = -1;
+	if (auto param = sdpParam.lock())
+	{
+		mSdpParam = param;
+		result = 0;
+	}
+	return result;
 }
 
 int SipMsgObj::SetSipMsgRequestStartLine(osip_message_t *& dstSipMsg, const char * method)

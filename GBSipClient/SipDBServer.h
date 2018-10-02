@@ -19,11 +19,13 @@ public:
 	int GetCameraChildren(std::string &pDeviceID, CameraInfoList &cameraInfoList);
 
 	int GetAllPlatfromInfo(PlatformInfoList& platformInfoList);
+	int GetLocalPlatformInfo(std::shared_ptr<PlatformInfo>& platformInfo);
+	int GetPlatformInfo(std::string& deviceID, std::shared_ptr<PlatformInfo>& platformInfo);
 
 	int GetIntData(const std::string& sql);
 
-	otl_connect mDB;
 private:
+	otl_connect mDB;
 	static bool isLogin;
 
 	int LoginDatabase();

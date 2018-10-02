@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>954</width>
+    <width>958</width>
     <height>900</height>
    </rect>
   </property>
@@ -33,7 +33,7 @@ selection-background-color: rgb(255, 56, 7);</string>
      <x>690</x>
      <y>560</y>
      <width>121</width>
-     <height>51</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -58,18 +58,18 @@ selection-background-color: rgb(255, 56, 7);</string>
   <widget class="QTableView" name="tableView">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>690</y>
-     <width>941</width>
+     <x>40</x>
+     <y>640</y>
+     <width>851</width>
      <height>192</height>
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="btn_queryCatalog">
    <property name="geometry">
     <rect>
-     <x>480</x>
-     <y>570</y>
+     <x>30</x>
+     <y>560</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -78,17 +78,17 @@ selection-background-color: rgb(255, 56, 7);</string>
     <string>目录查询</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QPushButton" name="btn_refreshCatalog">
    <property name="geometry">
     <rect>
-     <x>582</x>
-     <y>571</y>
+     <x>130</x>
+     <y>560</y>
      <width>75</width>
      <height>23</height>
     </rect>
    </property>
    <property name="text">
-    <string>播放</string>
+    <string>刷新目录</string>
    </property>
   </widget>
  </widget>
@@ -130,18 +130,34 @@ selection-background-color: rgb(255, 56, 7);</string>
    </hints>
   </connection>
   <connection>
-   <sender>pushButton</sender>
+   <sender>btn_queryCatalog</sender>
    <signal>clicked()</signal>
    <receiver>GBSipClientClass</receiver>
    <slot>queryCatalog()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>510</x>
-     <y>580</y>
+     <x>60</x>
+     <y>570</y>
     </hint>
     <hint type="destinationlabel">
      <x>979</x>
      <y>676</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_refreshCatalog</sender>
+   <signal>clicked()</signal>
+   <receiver>GBSipClientClass</receiver>
+   <slot>refreshCatalog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>153</x>
+     <y>569</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>992</x>
+     <y>667</y>
     </hint>
    </hints>
   </connection>
@@ -150,5 +166,6 @@ selection-background-color: rgb(255, 56, 7);</string>
   <slot>treeDoubleCllicked(QModelIndex)</slot>
   <slot>treeCllicked(QModelIndex)</slot>
   <slot>queryCatalog()</slot>
+  <slot>refreshCatalog()</slot>
  </slots>
 </ui>

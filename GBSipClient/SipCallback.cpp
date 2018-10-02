@@ -1,37 +1,5 @@
 #include "SipCallback.h"
 
-int SipCallback::AddSipMsgToTrnFF(osip_transaction_t * trn, osip_message_t * &sipMsg)
-{
-	int result = -1;
-	osip_event_t* event = osip_new_outgoing_sipmessage(sipMsg);
-	if (event == nullptr)
-	{
-		osip_message_free(sipMsg);
-		sipMsg = nullptr;
-	}
-	else if (trn)
-	{
-		result = osip_fifo_add(trn->transactionff, event);
-	}
-	else // trn == nullptr && event != nullptr
-	{
-		osip_transaction_t * trn = nullptr;
-		SipMgr::GetInstance()->CreateTransaction(trn, event);
-		result = osip_fifo_add(trn->transactionff, event);
-	}
-	return result;
-}
-
-int SipCallback::AddEventToTrnFF(osip_transaction_t * trn, osip_event_t *& event)
-{
-	int result = -1;
-	if (event && trn)
-	{
-		result = osip_fifo_add(trn->transactionff, event);
-	}
-	return result;
-}
-
 int SipCallback::osip_send_message_cb(osip_transaction_t * trn, osip_message_t * sipMsg, char * dstIP, int dstPort, int sendSock)
 {
 	char* dd = nullptr;
@@ -47,6 +15,8 @@ void SipCallback::osip_rcv_message_cb(int type, osip_transaction_t *trn, osip_me
 	{
 		return;
 	}
+
+	SipMgr* sipMgr = SipMgr::GetInstance();
 
 	SipMsgParser sipMsgParser;
 	auto xmlParam = sipMsgParser.GetXmlParam(sipMsg);
@@ -98,7 +68,7 @@ void SipCallback::osip_rcv_message_cb(int type, osip_transaction_t *trn, osip_me
 	case NOTIFY_KEEPALIVE:
 	{
 		sipMsgBuilder.CreateXxxSipMsg(sipMsg, responseSipMsg, 200);
-		AddSipMsgToTrnFF(trn, responseSipMsg);
+		sipMgr->AddSipMsgToTrnFF(trn, responseSipMsg);
 
 		static int i = 0;
 		i++;
@@ -119,7 +89,7 @@ void SipCallback::osip_rcv_message_cb(int type, osip_transaction_t *trn, osip_me
 			osip_message_to_str(inviteSipMsg, &strMsg, 0);
 			osip_free(strMsg);
 
-			AddSipMsgToTrnFF(nullptr, inviteSipMsg);
+			sipMgr->AddSipMsgToTrnFF(nullptr, inviteSipMsg);
 		}
 	}
 		break;
@@ -271,7 +241,7 @@ void SipCallback::osip_nist_rcv_register_cb(int type, osip_transaction_t * trn, 
 			{
 				std::string nonce = SipCommon::RandLengthStr(10);
 				sipMsgBuilder.CreateRegister401SipMsg(sipMsg, dstMsg, nonce);
-				AddSipMsgToTrnFF(trn, dstMsg);
+				sipInstance->AddSipMsgToTrnFF(trn, dstMsg);
 			}
 			else // 带鉴权
 			{
@@ -288,7 +258,7 @@ void SipCallback::osip_nist_rcv_register_cb(int type, osip_transaction_t * trn, 
 					// 创建regDialog
 					SipDialog regSipDialog = sipInstance->mSipDialogMgr->CreateSipDialog(trn, dstMsg, DialogType::REGISTER_DIALOG);
 										
-					AddSipMsgToTrnFF(trn, dstMsg);
+					sipInstance->AddSipMsgToTrnFF(trn, dstMsg);
 				}
 				else // 验证失败，403
 				{

@@ -30,14 +30,14 @@ public:
     QTreeWidget *treeWidget;
     QTreeView *treeView;
     QTableView *tableView;
-    QPushButton *pushButton;
-    QPushButton *pushButton_2;
+    QPushButton *btn_queryCatalog;
+    QPushButton *btn_refreshCatalog;
 
     void setupUi(QWidget *GBSipClientClass)
     {
         if (GBSipClientClass->objectName().isEmpty())
             GBSipClientClass->setObjectName(QStringLiteral("GBSipClientClass"));
-        GBSipClientClass->resize(954, 900);
+        GBSipClientClass->resize(958, 900);
         openGLWidget = new QOpenGLWidget(GBSipClientClass);
         openGLWidget->setObjectName(QStringLiteral("openGLWidget"));
         openGLWidget->setGeometry(QRect(280, 10, 651, 531));
@@ -48,25 +48,26 @@ public:
         __qtreewidgetitem->setText(0, QStringLiteral("1"));
         treeWidget->setHeaderItem(__qtreewidgetitem);
         treeWidget->setObjectName(QStringLiteral("treeWidget"));
-        treeWidget->setGeometry(QRect(690, 560, 121, 51));
+        treeWidget->setGeometry(QRect(690, 560, 121, 31));
         treeWidget->setStyleSheet(QStringLiteral(""));
         treeView = new QTreeView(GBSipClientClass);
         treeView->setObjectName(QStringLiteral("treeView"));
         treeView->setGeometry(QRect(10, 10, 241, 531));
         tableView = new QTableView(GBSipClientClass);
         tableView->setObjectName(QStringLiteral("tableView"));
-        tableView->setGeometry(QRect(0, 690, 941, 192));
-        pushButton = new QPushButton(GBSipClientClass);
-        pushButton->setObjectName(QStringLiteral("pushButton"));
-        pushButton->setGeometry(QRect(480, 570, 75, 23));
-        pushButton_2 = new QPushButton(GBSipClientClass);
-        pushButton_2->setObjectName(QStringLiteral("pushButton_2"));
-        pushButton_2->setGeometry(QRect(582, 571, 75, 23));
+        tableView->setGeometry(QRect(40, 640, 851, 192));
+        btn_queryCatalog = new QPushButton(GBSipClientClass);
+        btn_queryCatalog->setObjectName(QStringLiteral("btn_queryCatalog"));
+        btn_queryCatalog->setGeometry(QRect(30, 560, 75, 23));
+        btn_refreshCatalog = new QPushButton(GBSipClientClass);
+        btn_refreshCatalog->setObjectName(QStringLiteral("btn_refreshCatalog"));
+        btn_refreshCatalog->setGeometry(QRect(130, 560, 75, 23));
 
         retranslateUi(GBSipClientClass);
         QObject::connect(treeView, SIGNAL(doubleClicked(QModelIndex)), GBSipClientClass, SLOT(treeDoubleCllicked(QModelIndex)));
         QObject::connect(treeView, SIGNAL(clicked(QModelIndex)), GBSipClientClass, SLOT(treeCllicked(QModelIndex)));
-        QObject::connect(pushButton, SIGNAL(clicked()), GBSipClientClass, SLOT(queryCatalog()));
+        QObject::connect(btn_queryCatalog, SIGNAL(clicked()), GBSipClientClass, SLOT(queryCatalog()));
+        QObject::connect(btn_refreshCatalog, SIGNAL(clicked()), GBSipClientClass, SLOT(refreshCatalog()));
 
         QMetaObject::connectSlotsByName(GBSipClientClass);
     } // setupUi
@@ -74,8 +75,8 @@ public:
     void retranslateUi(QWidget *GBSipClientClass)
     {
         GBSipClientClass->setWindowTitle(QApplication::translate("GBSipClientClass", "GBSipClient", Q_NULLPTR));
-        pushButton->setText(QApplication::translate("GBSipClientClass", "\347\233\256\345\275\225\346\237\245\350\257\242", Q_NULLPTR));
-        pushButton_2->setText(QApplication::translate("GBSipClientClass", "\346\222\255\346\224\276", Q_NULLPTR));
+        btn_queryCatalog->setText(QApplication::translate("GBSipClientClass", "\347\233\256\345\275\225\346\237\245\350\257\242", Q_NULLPTR));
+        btn_refreshCatalog->setText(QApplication::translate("GBSipClientClass", "\345\210\267\346\226\260\347\233\256\345\275\225", Q_NULLPTR));
     } // retranslateUi
 
 };

@@ -4,8 +4,6 @@ bool SipDBServer::isLogin = false;
 
 SipDBServer::SipDBServer()
 {
-	mDB;
-	otl_connect m2DB;
 }
 
 SipDBServer::~SipDBServer()
@@ -327,6 +325,133 @@ int SipDBServer::GetAllPlatfromInfo(PlatformInfoList & platformInfoList)
 	} while (isNeedCheckDB);
 
 	return 0;
+}
+
+int SipDBServer::GetLocalPlatformInfo(std::shared_ptr<PlatformInfo>& platformInfo)
+{
+	int result = -1;
+
+	bool isNeedCheckDB = false;
+	std::string sql = "";
+	sql = "select PlatformID, Name, DeviceID, IP, Port, ConnectState, Status from tbl_Platform where PlatformID = \'1\'";
+
+	// PlatformInfo
+	int  id = 0;
+	char name[64] = { 0 };
+	char deviceID[20] = { 0 };
+	char ip[64] = { 0 };
+	int  port = 0;
+	int  upOrDown = 0;
+	char status[4] = { 0 };
+
+	do
+	{
+		if (isNeedCheckDB)
+		{
+			CheckDB();
+		}
+
+		try
+		{
+			otl_stream o(1, sql.c_str(), mDB);
+			while (!o.eof())
+			{
+				o >> id;
+				o >> name;
+				o >> deviceID;
+				o >> ip;
+				o >> port;
+				o >> upOrDown;
+				o >> status;
+
+				platformInfo->id = id;
+				platformInfo->name = name;
+				platformInfo->deviceID = deviceID;
+				platformInfo->ip = ip;
+				platformInfo->port = port;
+				platformInfo->upOrDown = upOrDown;
+				platformInfo->status = status;
+			}
+			result = 0;
+			break;
+		}
+		catch (otl_exception& e)
+		{
+			isNeedCheckDB = !isNeedCheckDB;
+			printf("%s\n", e.msg);
+		}
+	} while (isNeedCheckDB);
+	return result;
+}
+
+int SipDBServer::GetPlatformInfo(std::string& deviceId, std::shared_ptr<PlatformInfo>& platformInfo)
+{
+	int result = -1;
+	std::string sql = "";
+
+	// 获取DeviceID所属平台的PlatformID
+	sql = "select PlatformID from tbl_Platform where DeviceID = \'" + deviceId + "\'";
+	result = GetIntData(sql);
+	if (result < 0)
+	{
+		sql = "select PlatformID from tbl_camera where DeviceID = \'" + deviceId + "\'";
+		result = GetIntData(sql);
+	}
+	
+	if (result > 0)
+	{
+		result = -1;
+		bool isNeedCheckDB = false;
+		sql = "select PlatformID, Name, DeviceID, IP, Port, ConnectState, Status from tbl_Platform where PlatformID = \'" + std::to_string(result) + "\'";
+
+		// PlatformInfo
+		int  id = 0;
+		char name[64] = { 0 };
+		char deviceID[20] = { 0 };
+		char ip[64] = { 0 };
+		int  port = 0;
+		int  upOrDown = 0;
+		char status[4] = { 0 };
+
+		do
+		{
+			if (isNeedCheckDB)
+			{
+				CheckDB();
+			}
+
+			try
+			{
+				otl_stream o(1, sql.c_str(), mDB);
+				while (!o.eof())
+				{
+					o >> id;
+					o >> name;
+					o >> deviceID;
+					o >> ip;
+					o >> port;
+					o >> upOrDown;
+					o >> status;
+
+					platformInfo->id = id;
+					platformInfo->name = name;
+					platformInfo->deviceID = deviceID;
+					platformInfo->ip = ip;
+					platformInfo->port = port;
+					platformInfo->upOrDown = upOrDown;
+					platformInfo->status = status;
+				}
+				result = 0;
+				break;
+			}
+			catch (otl_exception& e)
+			{
+				isNeedCheckDB = !isNeedCheckDB;
+				printf("%s\n", e.msg);
+			}
+		} while (isNeedCheckDB);
+	}
+	return result;
 }
 
 int SipDBServer::GetIntData(const std::string & sql)

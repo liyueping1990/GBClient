@@ -21,7 +21,7 @@ private slots:
 	void treeDoubleCllicked(const QModelIndex &index); //点击树节点事件;
 	void treeCllicked(const QModelIndex &index); //点击树节点事件;
 	void queryCatalog();
-
+	void refreshCatalog();
 private:
 	Ui::GBSipClientClass ui;
 	SipMgr* mSipMgr;

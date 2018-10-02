@@ -48,12 +48,19 @@ public:
 	osip_t* sip;
 	SipSocketServer mSocketServer;
 	SipDialogMgr* mSipDialogMgr;
+	SipDBServer* mSipDB;
 
-	int CreateTransaction(osip_transaction_t* &transaction, osip_event_t* event);
+	std::shared_ptr<PlatformInfo> mLocalPlatformInfo;
+
+	int AddSipMsgToTrnFF(osip_transaction_t* trn, osip_message_t* &sipMsg);
+	int AddEventToTrnFF(osip_transaction_t* trn, osip_event_t* &event);
 
 	int QueryCatalog(std::string deviceID); // 查询国标平台或设备目录信息
-private:
-		
+	int Play(std::string deviceID); // 实时视频播放
+	int Playback(std::string deviceID); // 历史视频播放
+	int Download(std::string deviceID); // 历史视频下载
+
+private:		
 	SipMgr();
 	void Init();
 	static SipMgr* instance;
@@ -63,6 +70,7 @@ private:
 	void RegisterCommonCallbacks();
 
 	std::deque<osip_event_t*> mSipEvents;
+	int CreateTransaction(osip_transaction_t* &transaction, osip_event_t* event);
 	void ProcessIncomingSipMsg(std::string &sipMsg);
 	void ProcessOutGoingSipMsg(osip_transaction_t* callTransaction, osip_event_t* &event);
 

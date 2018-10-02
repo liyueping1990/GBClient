@@ -9,8 +9,8 @@ typedef class SipMsgObj
 public:
 	SipMsgObj();
 	virtual ~SipMsgObj();
-
-	int SetRemotePlatformInfo(std::weak_ptr<PlatformInfo> platformInfo, bool isLocal = false);
+	static std::shared_ptr<PlatformInfo> mLocalPlatformInfo;
+	int SetPlatformInfo(std::weak_ptr<PlatformInfo> platformInfo, bool isLocal = false);
 
 	// Register
 	int CreateRegister401SipMsg(const osip_message_t* srcSipMsg, osip_message_t* &dstSipMsg, std::string nonce, std::string toTag = ""); // 401
@@ -33,8 +33,13 @@ public:
 
 	// Parser
 	int ParserSipMsg(const osip_message_t* sipMsg);
-	XmlParam* GetXmlParam(const osip_message_t* sipMsg);
-	SdpParam* GetSdpParam(const osip_message_t* sipMsg);
+
+	std::shared_ptr<XmlParam> GetXmlParam(const osip_message_t* sipMsg);
+	int SetXmlParam(std::weak_ptr<XmlParam> xmlParam);
+
+	std::shared_ptr<SdpParam> GetSdpParam(const osip_message_t* sipMsg);
+	int SetSdpParam(std::weak_ptr<SdpParam> sdpParam);
+
 private:
 	// 平台参数信息
 	//int mLocalPlatformID;
@@ -49,12 +54,13 @@ private:
 	//std::string mRemoteIP;			// 级联平台sip信令IP地址
 	//int mRemotePort;		        // 级联平台sip信令端口号
 
-	static std::shared_ptr<PlatformInfo> mLocalPlatformInfo;
 	std::shared_ptr<PlatformInfo> mRemotePlatformInfo;
 
+	std::shared_ptr<XmlParam> mXmlParam;
+	std::shared_ptr<SdpParam> mSdpParam;
 
-	XmlParam* mXmlParam;
-	SdpParam* mSdpParam;
+	//XmlParam* mXmlParam;
+	//SdpParam* mSdpParam;
 	//RtspParam* mRtspParam;
 	SipMsgBodyParser*   mSipMsgBody;
 	SipMsgHeaderParser* mSipMsgHeader;

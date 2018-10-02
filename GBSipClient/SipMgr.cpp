@@ -13,10 +13,23 @@ SipMgr* SipMgr::GetInstance()
 
 SipMgr::SipMgr()
 {
+	int result = -1;
+
 	mIsExit = false;
 	mSipDialogMgr = new SipDialogMgr;
-}
+	mSipDB = new SipDBServer;
+	
+	mLocalPlatformInfo = std::make_shared<PlatformInfo>();
+	result = mSipDB->GetLocalPlatformInfo(mLocalPlatformInfo);
+	if (result)
+	{
+		std::cout << "无法获取本级平台信息" << std::endl;
+		return;
+	}
+	SipMsgObj::mLocalPlatformInfo = mLocalPlatformInfo;
 
+	Init();
+}
 
 SipMgr::~SipMgr()
 {
@@ -26,7 +39,7 @@ SipMgr::~SipMgr()
 
 int SipMgr::Start()
 {
-	Init();
+	//Init();
 
 	auto run = [&]()
 	{
@@ -186,12 +199,105 @@ int SipMgr::CreateTransaction(osip_transaction_t *& transaction, osip_event_t * 
 	return 0;
 }
 
+int SipMgr::AddSipMsgToTrnFF(osip_transaction_t * trn, osip_message_t * &sipMsg)
+{
+	int result = -1;
+	osip_event_t* event = osip_new_outgoing_sipmessage(sipMsg);
+	if (event == nullptr)
+	{
+		osip_message_free(sipMsg);
+		sipMsg = nullptr;
+	}
+	else if (trn)
+	{
+		result = osip_fifo_add(trn->transactionff, event);
+	}
+	else // trn == nullptr && event != nullptr
+	{
+		//osip_transaction_t * trn = nullptr;
+		CreateTransaction(trn, event); 
+		AddEventToTrnFF(trn, event);
+	}
+	return result;
+}
+
+int SipMgr::AddEventToTrnFF(osip_transaction_t * trn, osip_event_t *& event)
+{
+	int result = -1;
+	if (event && trn)
+	{
+		result = osip_fifo_add(trn->transactionff, event);
+	}
+	return result;
+}
+
 int SipMgr::QueryCatalog(std::string deviceID)
 {
 	SipMsgBuilder sipMsgBuilder;
-
+	
+	// 获取平台信息 
+	std::shared_ptr<PlatformInfo> platformInfo = std::make_shared<PlatformInfo>();
+	int result = mSipDB->GetPlatformInfo(deviceID, platformInfo);
+	if (result)
+	{
+		std::cout << "获取信息失败" << std::endl;
+	}
+	sipMsgBuilder.SetPlatformInfo(platformInfo);
+	
+	// 设置创建消息类型
+	std::shared_ptr<XmlParam> xmlParam = std::make_shared<XmlParam>();
+	xmlParam->deviceID = deviceID;
+	xmlParam->manscdpType = MESSAGE_MANSCDP_TYPE::QUERY_DEVICE_CATALOG;
+	xmlParam->sn = 1;
+	xmlParam->queryParam.queryCatalogParam.startTime;
+	xmlParam->queryParam.queryCatalogParam.endTime;
+	result = sipMsgBuilder.SetXmlParam(xmlParam);
+	
 	osip_message_t* dstSipMsg = nullptr;
-	sipMsgBuilder.CreateSipMsgXml(dstSipMsg, deviceID);
+	sipMsgBuilder.CreateSipMsgXml(dstSipMsg);
+
+	AddSipMsgToTrnFF(nullptr, dstSipMsg);
+	return 0;
+}
+
+int SipMgr::Play(std::string deviceID)
+{
+	SipMsgBuilder sipMsgBuilder;
+
+	// 获取平台信息 
+	std::shared_ptr<PlatformInfo> platformInfo = std::make_shared<PlatformInfo>();
+	int result = mSipDB->GetPlatformInfo(deviceID, platformInfo);
+	if (result)
+	{
+		std::cout << "获取信息失败" << std::endl;
+	}
+	sipMsgBuilder.SetPlatformInfo(platformInfo);
+
+	std::shared_ptr<SdpParam> sdpParam = std::make_shared<SdpParam>();
+	sdpParam->oParam.addr = "192.168.1.110";
+	sdpParam->oParam.userName = "34010000002005000001";
+	sdpParam->cParam.addr = "192.168.1.110";
+	sdpParam->mParam.port = 8000;
+	sdpParam->mParam.isRecvOnly = true;
+	sdpParam->y = "0001";
+	sipMsgBuilder.SetSdpParam(sdpParam);
+
+	osip_message_t* dstMsg = nullptr;
+	sipMsgBuilder.CreateInviteSipMsg(nullptr, dstMsg);
+
+	char* msg = nullptr;
+	osip_message_to_str(dstMsg, &msg, 0);
+	osip_free(msg);
+	return 0;
+}
+
+int SipMgr::Playback(std::string deviceID)
+{
+	return 0;
+}
+
+int SipMgr::Download(std::string deviceID)
+{
 	return 0;
 }
 
